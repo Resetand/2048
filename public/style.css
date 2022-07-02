@@ -1,0 +1,65 @@
+* {
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji,
+        Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+}
+
+:root {
+    --cell-gap: 10px;
+    --cell-size: 100px;
+    --board-size: 400px;
+
+    --board-bg: rgba(44, 44, 9, 0.249);
+    --empty-cell-bg: rgb(241, 241, 234);
+    --body-bg: rgb(248, 247, 247);
+}
+
+body {
+    background: var(--body-bg);
+}
+
+.game-container {
+    padding: 20px;
+    padding-bottom: 40px;
+    border-radius: 10px;
+    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.204);
+    max-width: 700px;
+    margin: 5% auto;
+    min-height: 500px;
+    background: #fff;
+    box-sizing: border-box;
+}
+
+.game-container h1 {
+    padding: 0;
+    max-width: var(--board-size);
+    margin: 0 auto;
+    margin-bottom: 16px;
+}
+
+#game-root {
+    width: var(--board-size);
+    height: var(--board-size);
+
+    background: var(--board-bg);
+    border-radius: 4px;
+    margin: auto;
+    display: flex;
+    gap: var(--cell-gap);
+    padding: var(--cell-gap);
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.cell {
+    width: calc(var(--cell-size) - var(--cell-gap));
+    height: calc(var(--cell-size) - var(--cell-gap));
+    display: inline-block;
+    border-radius: 2px;
+    background: var(--empty-cell-bg);
+    font-size: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}

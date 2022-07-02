@@ -1,0 +1,10 @@
+// {
+//     "filewatcher.commands": [
+//         {
+//             "match": "\\.ts*",
+//             "isAsync": true,
+//             "cmd": "tsc --build /Users/kamachekhin/code/2048/tsconfig.json",
+//             "event": "onFileChange"
+//         }
+//     ]
+// }
