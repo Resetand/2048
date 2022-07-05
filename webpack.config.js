@@ -1,3 +1,4 @@
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
@@ -8,7 +9,6 @@ module.exports = {
     output: {
         path: path.resolve(__dirname, "dist"),
         filename: "bundle.js",
-        publicPath: "./",
     },
     module: {
         rules: [
@@ -28,6 +28,10 @@ module.exports = {
         hot: true,
     },
     plugins: [
+        new CopyWebpackPlugin({
+            patterns: [{ from: "public", filter: (filepath) => !filepath.endsWith("index.html") }],
+        }),
+
         new HtmlWebpackPlugin({
             template: "public/index.html",
             hash: true, // cache busting
