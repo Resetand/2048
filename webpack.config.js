@@ -6,8 +6,9 @@ module.exports = {
     devtool: "source-map",
     mode: "development",
     output: {
-        path: path.resolve(__dirname, "build"),
+        path: path.resolve(__dirname, "dist"),
         filename: "bundle.js",
+        publicPath: "./",
     },
     module: {
         rules: [
@@ -30,7 +31,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: "public/index.html",
             hash: true, // cache busting
-            filename: "../build/index.html",
+            filename: "../dist/index.html",
         }),
     ],
 };
