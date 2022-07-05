@@ -1,5 +1,5 @@
 import { Board, Cell } from "./board";
-import { ControlledKey, Controller } from "./controller";
+import { Command, Controller } from "./controller";
 import { Storage } from "./storage";
 import { Renderer } from "./renderer";
 import { Coords } from "./types";
@@ -24,10 +24,10 @@ export class Game {
         const board = new Board(persisted?.boardSize ?? this.cfg.boardSize);
 
         const moveHandler = {
-            [ControlledKey.UP]: () => board.move("y", -1),
-            [ControlledKey.DOWN]: () => board.move("y", 1),
-            [ControlledKey.LEFT]: () => board.move("x", -1),
-            [ControlledKey.RIGHT]: () => board.move("x", 1),
+            [Command.UP]: () => board.move("y", -1),
+            [Command.DOWN]: () => board.move("y", 1),
+            [Command.LEFT]: () => board.move("x", -1),
+            [Command.RIGHT]: () => board.move("x", 1),
         };
 
         board.onUpdate(({ cells }) => {
@@ -50,7 +50,7 @@ export class Game {
             board.spawnCells(2);
         });
 
-        controller.listenControlledKeys((key) => {
+        controller.listenCommand((key) => {
             const move = moveHandler[key];
             const hasMoved = move();
 

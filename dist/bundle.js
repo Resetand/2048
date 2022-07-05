@@ -660,39 +660,74 @@ class Cell {
 
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   "ControlledKey": () => (/* binding */ ControlledKey),
+/* harmony export */   "Command": () => (/* binding */ Command),
 /* harmony export */   "Controller": () => (/* binding */ Controller)
 /* harmony export */ });
-var ControlledKey;
-(function (ControlledKey) {
-    ControlledKey[ControlledKey["LEFT"] = 0] = "LEFT";
-    ControlledKey[ControlledKey["UP"] = 1] = "UP";
-    ControlledKey[ControlledKey["RIGHT"] = 2] = "RIGHT";
-    ControlledKey[ControlledKey["DOWN"] = 3] = "DOWN";
-})(ControlledKey || (ControlledKey = {}));
+var Command;
+(function (Command) {
+    Command[Command["LEFT"] = 0] = "LEFT";
+    Command[Command["UP"] = 1] = "UP";
+    Command[Command["RIGHT"] = 2] = "RIGHT";
+    Command[Command["DOWN"] = 3] = "DOWN";
+})(Command || (Command = {}));
 class Controller {
     constructor() {
         this.KEY_MAP = {
-            w: ControlledKey.UP,
-            ArrowUp: ControlledKey.UP,
-            s: ControlledKey.DOWN,
-            ArrowDown: ControlledKey.DOWN,
-            a: ControlledKey.LEFT,
-            ArrowLeft: ControlledKey.LEFT,
-            d: ControlledKey.RIGHT,
-            ArrowRight: ControlledKey.RIGHT,
+            w: Command.UP,
+            ArrowUp: Command.UP,
+            s: Command.DOWN,
+            ArrowDown: Command.DOWN,
+            a: Command.LEFT,
+            ArrowLeft: Command.LEFT,
+            d: Command.RIGHT,
+            ArrowRight: Command.RIGHT,
         };
     }
-    listenControlledKeys(handler) {
+    listenCommand(handler) {
+        const keysUnsubscribe = this.keysListen(handler);
+        const gestureUnsubscribe = this.gestureListen(handler);
+        return {
+            unsubscribe: () => {
+                keysUnsubscribe();
+                gestureUnsubscribe();
+            },
+        };
+    }
+    keysListen(handler) {
         const listener = (event) => {
             const controlledKey = this.KEY_MAP[event.key];
-            if (controlledKey !== undefined) {
+            if (controlledKey !== undefined)
                 handler(controlledKey, event);
-            }
         };
         document.addEventListener("keydown", listener);
-        return {
-            unsubscribe: () => document.removeEventListener("keydown", listener),
+        return () => {
+            document.removeEventListener("keydown", listener);
+        };
+    }
+    gestureListen(handler) {
+        let touchstartX = 0;
+        let touchstartY = 0;
+        const touchStartListener = (e) => {
+            touchstartX = e.changedTouches[0].screenX;
+            touchstartY = e.changedTouches[0].screenY;
+        };
+        const touchEndListener = (e) => {
+            const touchendX = e.changedTouches[0].screenX;
+            const touchendY = e.changedTouches[0].screenY;
+            if (touchendX < touchstartX)
+                handler(Command.LEFT, e);
+            else if (touchendX > touchstartX)
+                handler(Command.RIGHT, e);
+            else if (touchendY < touchstartY)
+                handler(Command.UP, e);
+            else if (touchendY > touchstartY)
+                handler(Command.DOWN, e);
+        };
+        document.addEventListener("touchstart", touchStartListener);
+        document.addEventListener("touchend", touchEndListener);
+        return () => {
+            document.removeEventListener("touchstart", touchStartListener);
+            document.removeEventListener("touchend", touchEndListener);
         };
     }
 }
@@ -731,10 +766,10 @@ class Game {
         const renderer = new _renderer__WEBPACK_IMPORTED_MODULE_3__.Renderer(this.cfg.boardElement, this.cfg.boardSize);
         const board = new _board__WEBPACK_IMPORTED_MODULE_0__.Board((_a = persisted === null || persisted === void 0 ? void 0 : persisted.boardSize) !== null && _a !== void 0 ? _a : this.cfg.boardSize);
         const moveHandler = {
-            [_controller__WEBPACK_IMPORTED_MODULE_1__.ControlledKey.UP]: () => board.move("y", -1),
-            [_controller__WEBPACK_IMPORTED_MODULE_1__.ControlledKey.DOWN]: () => board.move("y", 1),
-            [_controller__WEBPACK_IMPORTED_MODULE_1__.ControlledKey.LEFT]: () => board.move("x", -1),
-            [_controller__WEBPACK_IMPORTED_MODULE_1__.ControlledKey.RIGHT]: () => board.move("x", 1),
+            [_controller__WEBPACK_IMPORTED_MODULE_1__.Command.UP]: () => board.move("y", -1),
+            [_controller__WEBPACK_IMPORTED_MODULE_1__.Command.DOWN]: () => board.move("y", 1),
+            [_controller__WEBPACK_IMPORTED_MODULE_1__.Command.LEFT]: () => board.move("x", -1),
+            [_controller__WEBPACK_IMPORTED_MODULE_1__.Command.RIGHT]: () => board.move("x", 1),
         };
         board.onUpdate(({ cells }) => {
             if (this.isGameOver(cells)) {
@@ -752,7 +787,7 @@ class Game {
             board.reset();
             board.spawnCells(2);
         });
-        controller.listenControlledKeys((key) => {
+        controller.listenCommand((key) => {
             const move = moveHandler[key];
             const hasMoved = move();
             // spawn cell if has moved
