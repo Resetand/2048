@@ -1,8 +1,12 @@
 import { Game } from "./game";
 
-const root = document.getElementById("game-root")!;
-const game = new Game(root);
+const boardElement = document.getElementById("board-root")!;
+const scoreValueElement = document.getElementById("score-value")!;
 
-game.reset();
+const game = new Game({
+    scoreValueElement,
+    boardElement,
+    boardSize: 4,
+});
 
-// asd
+game.bootstrap();

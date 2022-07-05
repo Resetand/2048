@@ -4,15 +4,27 @@
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="stylesheet" href="/public/style.css" />
+        <link rel="stylesheet" href="/style.css" />
         <title>@2048</title>
     </head>
     <body>
-        <div class="game-container">
-            <h1>2048</h1>
-            <div id="game-root"></div>
+        <div class="game">
+            <div class="container">
+                <h1 class="title">2048</h1>
+                <div class="toolbar">
+                    <div class="score">
+                        <span class="score-label">score:</span>
+                        <span class="score-value" id="current-score-value"></span>
+                    </div>
+                    <div class="actions">
+                        <button id="reset-button" class="button">&#x21bb Reset</button>
+                    </div>
+                </div>
+                <div class="board" id="board-root">
+                    <div class="board-grid"></div>
+                    <div class="board-scene"></div>
+                </div>
+            </div>
         </div>
-
-        <!-- <script type="module" src="./dist/index.js"></script> -->
     </body>
 </html>

@@ -2,7 +2,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
 
 module.exports = {
-    entry: "./src/index.tsx",
+    entry: "./src/index.ts",
     devtool: "source-map",
     mode: "development",
     output: {
@@ -11,13 +11,6 @@ module.exports = {
     },
     module: {
         rules: [
-            {
-                test: /\.js$/,
-                exclude: /node_modules/,
-                use: {
-                    loader: "babel-loader",
-                },
-            },
             {
                 test: /\.(ts|tsx)?$/,
                 loader: "ts-loader",

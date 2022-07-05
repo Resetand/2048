@@ -8,8 +8,6 @@ export enum ControlledKey {
 }
 
 export class Controller {
-    public constructor(private boardElement: HTMLElement) {}
-
     private KEY_MAP: Record<string, ControlledKey> = {
         w: ControlledKey.UP,
         ArrowUp: ControlledKey.UP,
@@ -27,30 +25,17 @@ export class Controller {
     public listenControlledKeys(handler: (key: ControlledKey, event: KeyboardEvent) => void) {
         const listener = (event: KeyboardEvent) => {
             const controlledKey = this.KEY_MAP[event.key];
-            if (controlledKey) {
+            console.log(event.key, controlledKey);
+
+            if (controlledKey !== undefined) {
                 handler(controlledKey, event);
             }
         };
 
-        window.addEventListener("keydown", listener);
+        document.addEventListener("keydown", listener);
 
         return {
-            unsubscribe: () => window.removeEventListener("keydown", listener),
+            unsubscribe: () => document.removeEventListener("keydown", listener),
         };
-    }
-
-    public createCellElement(cell: Cell) {
-        const el = document.createElement("div");
-        el.classList.add("cell");
-        el.classList.add(`cell-${cell.value}`);
-        el.innerHTML = String(cell.value);
-        return el;
-    }
-
-    public draw(cells: Cell[]) {
-        alert("draw");
-
-        // ????
-        (this.boardElement as any).replaceChildren(...cells.map((cell) => this.createCellElement(cell)));
     }
 }
