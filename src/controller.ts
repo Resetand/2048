@@ -77,9 +77,21 @@ export class Controller {
                 // vertical swipe
                 handler(touchendY < touchstartY ? Command.UP : Command.DOWN, e);
             }
+
+            //
+            e.preventDefault();
+            e.returnValue = false;
+            return false;
         };
-        document.addEventListener("touchstart", touchStartListener);
-        document.addEventListener("touchend", touchEndListener);
+
+        //         window.addEventListener('touchmove', this.preventDefault, {passive: false});
+        // inner-slider.js -> componentWillUnmount()
+        // window.removeEventListener('touchmove', this.preventDefault, {passive: false});
+
+        // preventDefault = (e) => { if(this.state.swiping) { e.preventDefault(); e.returnValue = false; return false; } };
+
+        document.addEventListener("touchstart", touchStartListener, { passive: true });
+        document.addEventListener("touchend", touchEndListener, { passive: true });
 
         return () => {
             document.removeEventListener("touchstart", touchStartListener);
