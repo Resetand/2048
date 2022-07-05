@@ -63,10 +63,20 @@ export class Controller {
             const touchendX = e.changedTouches[0].screenX;
             const touchendY = e.changedTouches[0].screenY;
 
-            if (touchendX < touchstartX) handler(Command.LEFT, e);
-            else if (touchendX > touchstartX) handler(Command.RIGHT, e);
-            else if (touchendY < touchstartY) handler(Command.UP, e);
-            else if (touchendY > touchstartY) handler(Command.DOWN, e);
+            const diffX = Math.abs(touchendX - touchstartX);
+            const diffY = Math.abs(touchendY - touchstartY);
+
+            if (diffX < 10 && diffY < 10) {
+                return;
+            }
+
+            if (diffX > diffY) {
+                // horizontal swipe
+                handler(touchendX < touchstartX ? Command.LEFT : Command.RIGHT, e);
+            } else {
+                // vertical swipe
+                handler(touchendY < touchstartY ? Command.UP : Command.DOWN, e);
+            }
         };
         document.addEventListener("touchstart", touchStartListener);
         document.addEventListener("touchend", touchEndListener);
