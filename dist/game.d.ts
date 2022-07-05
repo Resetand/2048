@@ -7,6 +7,7 @@ export declare class Game {
     private cfg;
     constructor(cfg: GameConfig);
     bootstrap(): void;
+    private isWin;
     private isGameOver;
 }
 export {};

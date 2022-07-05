@@ -27,13 +27,13 @@ body {
 .game {
     padding: 20px;
     padding-bottom: 40px;
-    border-radius: 10px;
-    box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.204);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.204);
     min-height: 500px;
     background: #fff;
     box-sizing: border-box;
     max-width: 700px;
-    margin: 5% auto;
+    margin: 0 auto;
+    height: 100vh;
 }
 
 .toolbar {

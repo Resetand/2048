@@ -764,9 +764,9 @@ class Game {
     }
     bootstrap() {
         var _a;
+        const persisted = _storage__WEBPACK_IMPORTED_MODULE_2__.Storage.load();
         const resetButton = document.getElementById("reset-button");
         const currentScoreValue = document.getElementById("current-score-value");
-        const persisted = _storage__WEBPACK_IMPORTED_MODULE_2__.Storage.load();
         const controller = new _controller__WEBPACK_IMPORTED_MODULE_1__.Controller();
         const renderer = new _renderer__WEBPACK_IMPORTED_MODULE_3__.Renderer(this.cfg.boardElement, this.cfg.boardSize);
         const board = new _board__WEBPACK_IMPORTED_MODULE_0__.Board((_a = persisted === null || persisted === void 0 ? void 0 : persisted.boardSize) !== null && _a !== void 0 ? _a : this.cfg.boardSize);
@@ -777,15 +777,27 @@ class Game {
             [_controller__WEBPACK_IMPORTED_MODULE_1__.Command.RIGHT]: () => board.move("x", 1),
         };
         board.onUpdate(({ cells }) => {
-            if (this.isGameOver(cells)) {
-                alert("Game Over!");
-                board.reset();
-                board.spawnCells(2);
-                return;
-            }
             const score = cells.reduce((acc, cell) => acc + cell.value, 0);
             currentScoreValue.innerHTML = String(score);
             renderer.render(cells);
+            if (this.isGameOver(cells)) {
+                setTimeout(() => {
+                    // wait animation
+                    alert("Game Over!");
+                    board.reset();
+                    board.spawnCells(2);
+                }, 300);
+                return;
+            }
+            if (this.isWin(cells)) {
+                // wait animation
+                setTimeout(() => {
+                    alert("You won 🎉🎉🎉");
+                    board.reset();
+                    board.spawnCells(2);
+                }, 300);
+                return;
+            }
             _storage__WEBPACK_IMPORTED_MODULE_2__.Storage.save({ cells, boardSize: this.cfg.boardSize });
         });
         resetButton.addEventListener("click", () => {
@@ -799,7 +811,7 @@ class Game {
             if (hasMoved)
                 board.spawnCells(1);
         });
-        if (persisted) {
+        if (persisted === null || persisted === void 0 ? void 0 : persisted.cells) {
             board.restore(persisted.cells);
         }
         else {
@@ -807,6 +819,10 @@ class Game {
             board.spawnCells(2);
         }
         renderer.mount();
+    }
+    isWin(cells) {
+        const GOAL = 2048;
+        return cells.some((cell) => cell.value === GOAL);
     }
     isGameOver(cells) {
         const getCoordsKey = (coords) => `${coords.x}x${coords.y}`;
@@ -1088,19 +1104,24 @@ __webpack_require__.r(__webpack_exports__);
 
 class Storage {
     static save(state) {
-        const json = {
-            boardSize: state.boardSize,
-            cells: state.cells.map(({ x, y, value }) => ({ x, y, value })),
-        };
-        localStorage.setItem(this.LS_KEY, JSON.stringify(json));
+        var _a;
+        const loaded = this.loadJson();
+        localStorage.setItem(this.LS_KEY, JSON.stringify(Object.assign(Object.assign({}, loaded), { boardSize: state.boardSize, cells: (_a = state.cells) === null || _a === void 0 ? void 0 : _a.map(({ x, y, value }) => ({ x, y, value })) })));
     }
     static load() {
+        var _a;
+        const parsed = this.loadJson();
+        if (!parsed) {
+            return null;
+        }
+        return {
+            boardSize: parsed.boardSize,
+            cells: (_a = parsed.cells) === null || _a === void 0 ? void 0 : _a.map(({ x, y, value }) => new _board__WEBPACK_IMPORTED_MODULE_0__.Cell({ x, y }, value)),
+        };
+    }
+    static loadJson() {
         try {
-            const parsed = JSON.parse(localStorage.getItem(this.LS_KEY));
-            return {
-                boardSize: parsed.boardSize,
-                cells: parsed.cells.map(({ x, y, value }) => new _board__WEBPACK_IMPORTED_MODULE_0__.Cell({ x, y }, value)),
-            };
+            return JSON.parse(localStorage.getItem(this.LS_KEY));
         }
         catch (_a) {
             return null;

@@ -14,10 +14,10 @@ export class Game {
     constructor(private cfg: GameConfig) {}
 
     bootstrap() {
+        const persisted = Storage.load();
+
         const resetButton = document.getElementById("reset-button")!;
         const currentScoreValue = document.getElementById("current-score-value")!;
-
-        const persisted = Storage.load();
 
         const controller = new Controller();
         const renderer = new Renderer(this.cfg.boardElement, this.cfg.boardSize);
@@ -31,17 +31,31 @@ export class Game {
         };
 
         board.onUpdate(({ cells }) => {
-            if (this.isGameOver(cells)) {
-                alert("Game Over!");
-                board.reset();
-                board.spawnCells(2);
-                return;
-            }
-
             const score = cells.reduce((acc, cell) => acc + cell.value, 0);
             currentScoreValue.innerHTML = String(score);
 
             renderer.render(cells);
+
+            if (this.isGameOver(cells)) {
+                setTimeout(() => {
+                    // wait animation
+                    alert("Game Over!");
+                    board.reset();
+                    board.spawnCells(2);
+                }, 300);
+                return;
+            }
+
+            if (this.isWin(cells)) {
+                // wait animation
+                setTimeout(() => {
+                    alert("You won 🎉🎉🎉");
+                    board.reset();
+                    board.spawnCells(2);
+                }, 300);
+                return;
+            }
+
             Storage.save({ cells, boardSize: this.cfg.boardSize });
         });
 
@@ -58,7 +72,7 @@ export class Game {
             if (hasMoved) board.spawnCells(1);
         });
 
-        if (persisted) {
+        if (persisted?.cells) {
             board.restore(persisted.cells);
         } else {
             board.reset();
@@ -66,6 +80,11 @@ export class Game {
         }
 
         renderer.mount();
+    }
+
+    private isWin(cells: Cell[]): boolean {
+        const GOAL = 2048;
+        return cells.some((cell) => cell.value === GOAL);
     }
 
     private isGameOver(cells: Cell[]) {

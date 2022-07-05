@@ -5,7 +5,8 @@ interface GamePersisted {
 }
 export declare class Storage {
     private static LS_KEY;
-    static save(state: GamePersisted): void;
-    static load(): GamePersisted | null;
+    static save(state: Partial<GamePersisted>): void;
+    static load(): Partial<GamePersisted> | null;
+    private static loadJson;
 }
 export {};

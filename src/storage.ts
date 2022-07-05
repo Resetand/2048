@@ -12,20 +12,34 @@ interface GamePersistedJson {
 
 export class Storage {
     private static LS_KEY = "game-state";
-    public static save(state: GamePersisted) {
-        const json: GamePersistedJson = {
-            boardSize: state.boardSize,
-            cells: state.cells.map(({ x, y, value }) => ({ x, y, value })),
-        };
-        localStorage.setItem(this.LS_KEY, JSON.stringify(json));
+    public static save(state: Partial<GamePersisted>) {
+        const loaded = this.loadJson()!;
+
+        localStorage.setItem(
+            this.LS_KEY,
+            JSON.stringify({
+                ...loaded,
+                boardSize: state.boardSize,
+                cells: state.cells?.map(({ x, y, value }) => ({ x, y, value })),
+            })
+        );
     }
-    public static load(): GamePersisted | null {
+    public static load(): Partial<GamePersisted> | null {
+        const parsed = this.loadJson();
+
+        if (!parsed) {
+            return null;
+        }
+
+        return {
+            boardSize: parsed.boardSize,
+            cells: parsed.cells?.map(({ x, y, value }) => new Cell({ x, y }, value)),
+        };
+    }
+
+    private static loadJson(): Partial<GamePersistedJson> | null {
         try {
-            const parsed = JSON.parse(localStorage.getItem(this.LS_KEY)!) as GamePersistedJson;
-            return {
-                boardSize: parsed.boardSize,
-                cells: parsed.cells.map(({ x, y, value }) => new Cell({ x, y }, value)),
-            };
+            return JSON.parse(localStorage.getItem(this.LS_KEY)!);
         } catch {
             return null;
         }
