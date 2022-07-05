@@ -24,12 +24,6 @@ export class Board {
         this.setState({ cells: [] });
     }
 
-    public get sortedCells() {
-        return [...this.state.cells].sort(
-            (a, b) => calcIndexByCoords(a.coords, this.boardSize) - calcIndexByCoords(b.coords, this.boardSize)
-        );
-    }
-
     public move(axis: keyof Coords, step: -1 | 1): boolean {
         const boardSize = this.boardSize;
 

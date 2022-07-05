@@ -25,7 +25,6 @@ export class Controller {
     public listenControlledKeys(handler: (key: ControlledKey, event: KeyboardEvent) => void) {
         const listener = (event: KeyboardEvent) => {
             const controlledKey = this.KEY_MAP[event.key];
-            console.log(event.key, controlledKey);
 
             if (controlledKey !== undefined) {
                 handler(controlledKey, event);
