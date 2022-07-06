@@ -1320,6 +1320,14 @@ const game = new _game__WEBPACK_IMPORTED_MODULE_0__.Game({
     boardSize: 4,
 });
 game.bootstrap();
+/***********************************/
+/********* SERVICE WORKER **********/
+/***********************************/
+/* Put code here */
+/* Only register a service worker if it's supported */
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("./service-worker.js");
+}
 
 })();
 
