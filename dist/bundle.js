@@ -920,7 +920,7 @@ class Renderer {
     }
     mount() {
         const cellSizeCSS = `calc(var(${Renderer.BOARD_SIZE_VAR}) / ${this.boardSize})`;
-        const cellGapCSS = `calc(var(${Renderer.CELL_SIZE_VAR}) * 0.04) `;
+        const cellGapCSS = `calc(var(${Renderer.CELL_SIZE_VAR}) * 0.08) `;
         Renderer.setCSSVar(Renderer.CELL_SIZE_VAR, cellSizeCSS);
         Renderer.setCSSVar(Renderer.CELL_GAP_VAR, cellGapCSS);
         const createEmptyCell = () => {
