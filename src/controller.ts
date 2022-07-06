@@ -10,6 +10,8 @@ export enum Command {
 type CommandHandler = (command: Command, event: KeyboardEvent | TouchEvent) => void;
 
 export class Controller {
+    constructor(private boardElement: HTMLElement) {}
+
     private KEY_MAP: Record<string, Command> = {
         w: Command.UP,
         ArrowUp: Command.UP,
@@ -57,6 +59,10 @@ export class Controller {
         const touchStartListener = (e: TouchEvent) => {
             touchstartX = e.changedTouches[0].screenX;
             touchstartY = e.changedTouches[0].screenY;
+
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
         };
 
         const touchEndListener = (e: TouchEvent) => {
@@ -77,25 +83,14 @@ export class Controller {
                 // vertical swipe
                 handler(touchendY < touchstartY ? Command.UP : Command.DOWN, e);
             }
-
-            //
-            e.preventDefault();
-            e.returnValue = false;
-            return false;
         };
 
-        //         window.addEventListener('touchmove', this.preventDefault, {passive: false});
-        // inner-slider.js -> componentWillUnmount()
-        // window.removeEventListener('touchmove', this.preventDefault, {passive: false});
-
-        // preventDefault = (e) => { if(this.state.swiping) { e.preventDefault(); e.returnValue = false; return false; } };
-
-        document.addEventListener("touchstart", touchStartListener, { passive: true });
-        document.addEventListener("touchend", touchEndListener, { passive: true });
+        this.boardElement.addEventListener("touchstart", touchStartListener, { passive: true });
+        this.boardElement.addEventListener("touchend", touchEndListener, { passive: true });
 
         return () => {
-            document.removeEventListener("touchstart", touchStartListener);
-            document.removeEventListener("touchend", touchEndListener);
+            this.boardElement.removeEventListener("touchstart", touchStartListener);
+            this.boardElement.removeEventListener("touchend", touchEndListener);
         };
     }
 }

@@ -671,7 +671,8 @@ var Command;
     Command[Command["DOWN"] = 3] = "DOWN";
 })(Command || (Command = {}));
 class Controller {
-    constructor() {
+    constructor(boardElement) {
+        this.boardElement = boardElement;
         this.KEY_MAP = {
             w: Command.UP,
             ArrowUp: Command.UP,
@@ -710,6 +711,9 @@ class Controller {
         const touchStartListener = (e) => {
             touchstartX = e.changedTouches[0].screenX;
             touchstartY = e.changedTouches[0].screenY;
+            e.stopPropagation();
+            e.preventDefault();
+            return false;
         };
         const touchEndListener = (e) => {
             const touchendX = e.changedTouches[0].screenX;
@@ -727,20 +731,12 @@ class Controller {
                 // vertical swipe
                 handler(touchendY < touchstartY ? Command.UP : Command.DOWN, e);
             }
-            //
-            e.preventDefault();
-            e.returnValue = false;
-            return false;
         };
-        //         window.addEventListener('touchmove', this.preventDefault, {passive: false});
-        // inner-slider.js -> componentWillUnmount()
-        // window.removeEventListener('touchmove', this.preventDefault, {passive: false});
-        // preventDefault = (e) => { if(this.state.swiping) { e.preventDefault(); e.returnValue = false; return false; } };
-        document.addEventListener("touchstart", touchStartListener, { passive: true });
-        document.addEventListener("touchend", touchEndListener, { passive: true });
+        this.boardElement.addEventListener("touchstart", touchStartListener, { passive: true });
+        this.boardElement.addEventListener("touchend", touchEndListener, { passive: true });
         return () => {
-            document.removeEventListener("touchstart", touchStartListener);
-            document.removeEventListener("touchend", touchEndListener);
+            this.boardElement.removeEventListener("touchstart", touchStartListener);
+            this.boardElement.removeEventListener("touchend", touchEndListener);
         };
     }
 }
@@ -775,7 +771,7 @@ class Game {
         const persisted = _storage__WEBPACK_IMPORTED_MODULE_2__.Storage.load();
         const resetButton = document.getElementById("reset-button");
         const currentScoreValue = document.getElementById("current-score-value");
-        const controller = new _controller__WEBPACK_IMPORTED_MODULE_1__.Controller();
+        const controller = new _controller__WEBPACK_IMPORTED_MODULE_1__.Controller(this.cfg.boardElement);
         const renderer = new _renderer__WEBPACK_IMPORTED_MODULE_3__.Renderer(this.cfg.boardElement, this.cfg.boardSize);
         const board = new _board__WEBPACK_IMPORTED_MODULE_0__.Board((_a = persisted === null || persisted === void 0 ? void 0 : persisted.boardSize) !== null && _a !== void 0 ? _a : this.cfg.boardSize);
         const moveHandler = {

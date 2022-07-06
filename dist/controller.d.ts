@@ -6,6 +6,8 @@ export declare enum Command {
 }
 declare type CommandHandler = (command: Command, event: KeyboardEvent | TouchEvent) => void;
 export declare class Controller {
+    private boardElement;
+    constructor(boardElement: HTMLElement);
     private KEY_MAP;
     listenCommand(handler: CommandHandler): {
         unsubscribe: () => void;

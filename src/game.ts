@@ -19,7 +19,7 @@ export class Game {
         const resetButton = document.getElementById("reset-button")!;
         const currentScoreValue = document.getElementById("current-score-value")!;
 
-        const controller = new Controller();
+        const controller = new Controller(this.cfg.boardElement);
         const renderer = new Renderer(this.cfg.boardElement, this.cfg.boardSize);
         const board = new Board(persisted?.boardSize ?? this.cfg.boardSize);
 
