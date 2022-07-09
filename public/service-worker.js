@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = "offline";
+const CACHE_NAME = "offline.v1";
 const CACHED_FILES = ["favicon.ico", "index.html", "bundle.js", "style.css"];
 
 // for offline mode
