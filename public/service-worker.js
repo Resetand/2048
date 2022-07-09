@@ -14,7 +14,13 @@ self.addEventListener("install", function (e) {
 });
 
 self.addEventListener("activate", (event) => {
-    event.waitUntil(self.clients.claim());
+    // cleanup outdated keys
+    event.waitUntil(
+        caches.keys().then((keyList) => {
+            const outdated = keyList.filter((k) => k !== CACHE_NAME);
+            return Promise.all(outdated.map(caches.delete));
+        })
+    );
 });
 
 self.addEventListener("fetch", (event) => {
