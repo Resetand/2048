@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-const CACHE_NAME = "offline.v1";
+const CACHE_NAME = "cache.v2";
 const CACHED_FILES = ["favicon.ico", "index.html", "bundle.*.js", "style.css"];
 
 // for offline mode
@@ -26,7 +26,7 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
     event.respondWith(
         caches.match(event.request, { ignoreSearch: true }).then((response) => {
-            return response || fetch(event.request);
+            return fetch(event.request).catch(() => response);
         })
     );
 });

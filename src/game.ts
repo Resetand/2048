@@ -134,7 +134,7 @@ export class Game {
     }
 
     private isWin(cells: Cell[]): boolean {
-        const GOAL = 16;
+        const GOAL = 2048;
         return cells.some((cell) => cell.value === GOAL);
     }
 
