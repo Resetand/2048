@@ -36,7 +36,7 @@ export class Renderer {
 
     public mount() {
         const cellSizeCSS = `calc(var(${Renderer.BOARD_SIZE_VAR}) / ${this.boardSize})`;
-        const cellGapCSS = `calc(var(${Renderer.CELL_SIZE_VAR}) * 0.08) `;
+        const cellGapCSS = `calc(var(${Renderer.CELL_SIZE_VAR}) * 0.03) `;
 
         Renderer.setCSSVar(Renderer.CELL_SIZE_VAR, cellSizeCSS);
         Renderer.setCSSVar(Renderer.CELL_GAP_VAR, cellGapCSS);
@@ -51,10 +51,10 @@ export class Renderer {
     }
 
     private static createCellElement(cell: Cell) {
-        return Renderer.updateCellElement(cell, document.createElement("div"), true);
+        return Renderer.updateCellElement(cell, document.createElement("div"));
     }
 
-    public static updateCellElement(cell: Cell, element: HTMLElement, useAbsolute?: boolean) {
+    public static updateCellElement(cell: Cell, element: HTMLElement) {
         element.className = ""; // cleanup all classNames before
 
         element.classList.add("cell", "cell-filled", `cell-${cell.value}`);
@@ -63,16 +63,6 @@ export class Renderer {
         const shiftStep = `calc(var(${Renderer.CELL_SIZE_VAR}) + var(${Renderer.CELL_GAP_VAR}) * 0.25)`;
         const xShift = `calc(${shiftStep} * ${cell.x})`;
         const yShift = `calc(${shiftStep} * ${cell.y})`;
-
-        // if (useAbsolute) {
-        //     element.style.transform = "";
-        //     element.style.top = xShift;
-        //     element.style.left = yShift;
-        // } else {
-        //     element.style.top = "";
-        //     element.style.left = "";
-        //     element.style.transform = `translate(${xShift}, ${yShift})`;
-        // }
 
         element.style.transform = "";
         element.style.top = yShift;
@@ -91,37 +81,9 @@ export class Renderer {
         this.renderCleanup.forEach((cleanup) => cleanup());
         this.renderCleanup = [];
 
-        // let transitionStarted = false;
-        // const alreadyHandled = new Set<VoidFunction>();
-
-        // const _beforeTransitionHandler = () => {
-        //     transitionStarted = true;
-        // };
-        // this.boardSceneElement.addEventListener("transitionstart", _beforeTransitionHandler);
-        // this.renderCleanup.push(() => this.boardSceneElement.removeEventListener("transitionstart", _beforeTransitionHandler));
-
         const afterTransition = (callback: VoidFunction) => {
-            // const handler = () => {
-            //     if (!alreadyHandled.has(callback)) {
-            //         callback();
-            //         alreadyHandled.add(callback);
-            //     }
-            // };
-
-            // if (!transitionStarted) {
-            //     handler();
-            //     return;
-            // }
-
             const timerID = window.setTimeout(callback, Renderer.MOVE_TRANSITION_MS);
             this.renderCleanup.push(() => clearTimeout(timerID));
-
-            // this.boardSceneElement.addEventListener("transitionend", handler);
-            // this.boardSceneElement.addEventListener("transitioncancel", handler);
-            // this.renderCleanup.push(
-            //     () => this.boardSceneElement.removeEventListener("transitionend", handler),
-            //     () => this.boardSceneElement.removeEventListener("transitioncancel", handler)
-            // );
         };
         return { afterTransition };
     };
@@ -147,15 +109,6 @@ export class Renderer {
             if (!element) {
                 // create new element
                 const newElement = Renderer.createCellElement(cell);
-                // newElement.style.transform = "";
-                // const shiftCSS = `calc(var(${Renderer.CELL_SIZE_VAR}) + var(${Renderer.CELL_GAP_VAR}) * 0.25)`;
-                // newElement.style.top = `calc(${shiftCSS} * ${cell.x})`;
-                // newElement.style.left = `calc(${shiftCSS} * ${cell.y})`;
-
-                // newElement.classList.add('no-transition')
-                // hooks.afterTransition(() => this.boardSceneElement.append(newElement));
-                // this.boardSceneElement.append(newElement);
-                // this.boardSceneElement.append(newElement);
                 hooks.afterTransition(() => this.boardSceneElement.append(newElement));
                 continue;
             }
@@ -166,7 +119,6 @@ export class Renderer {
         const removedElements = cellElements.filter((el) => !currentKeys.has(getDataKey(el)));
 
         for (const removedEl of removedElements) {
-            // hooks.afterTransition(() => removedEl.remove());
             removedEl.remove();
         }
     }

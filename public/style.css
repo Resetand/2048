@@ -250,8 +250,12 @@ body {
 
     :root {
         --body-bg: rgb(50, 46, 46);
-        --game-container-bg: rgb(57, 54, 54);
+        --game-container-bg: rgb(50, 46, 46);
         --default-cell-text-color: #292826;
+    }
+
+    .game {
+        box-shadow: unset;
     }
 
     .button {

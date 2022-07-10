@@ -1,15 +1,27 @@
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
+
 const path = require("path");
 
+const isProd = process.env.NODE_ENV === "production";
+
+/** @type { import('webpack').Configuration } */
 module.exports = {
     entry: "./src/index.ts",
     devtool: "source-map",
-    mode: "development",
+    mode: isProd ? "production" : "development",
     output: {
         path: path.resolve(__dirname, "dist"),
-        filename: "bundle.js",
+        filename: "bundle.[hash].js",
+        clean: true,
     },
+    optimization: {
+        minimize: isProd,
+        minimizer: [new TerserPlugin(), new CssMinimizerPlugin()],
+    },
+
     module: {
         rules: [
             {
@@ -36,6 +48,7 @@ module.exports = {
             template: "public/index.html",
             hash: true, // cache busting
             filename: "../dist/index.html",
+            minify: isProd,
         }),
     ],
 };

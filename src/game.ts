@@ -3,6 +3,7 @@ import { Command, Controller } from "./controller";
 import { Storage } from "./storage";
 import { Renderer } from "./renderer";
 import { Coords } from "./types";
+import { sleep } from "./utils";
 
 type GameConfig = {
     boardElement: HTMLElement;
@@ -10,18 +11,59 @@ type GameConfig = {
     boardSize: number;
 };
 
+type GameState = {
+    score: number;
+    cells: Cell[];
+    boardSize: number;
+    afterPartyMode: boolean;
+};
+
 export class Game {
+    private storage = new Storage<GameState>("game-state.v1", {
+        cells: [
+            (cells) => cells?.map(({ x, y, value }) => ({ x, y, value })),
+            (parsed) => parsed?.map(({ x, y, value }: any) => new Cell({ x, y }, value)),
+        ],
+    });
+
+    private _state?: Partial<GameState>;
+
     constructor(private cfg: GameConfig) {}
 
-    bootstrap() {
-        const persisted = Storage.load();
+    private get state(): GameState {
+        const persisted = this.storage.load();
 
+        const DEFAULT_STATE: GameState = {
+            boardSize: this.cfg.boardSize,
+            cells: [],
+            score: 0,
+            afterPartyMode: false,
+        };
+
+        if (this._state) {
+            return { ...DEFAULT_STATE, ...this._state };
+        }
+
+        if (persisted) {
+            return persisted;
+        }
+
+        return DEFAULT_STATE;
+    }
+
+    private setState(patch: Partial<GameState>) {
+        const newState = { ...this.state, ...patch };
+        this.storage.save(newState);
+        this._state = newState;
+    }
+
+    bootstrap() {
         const resetButton = document.getElementById("reset-button")!;
         const currentScoreValue = document.getElementById("current-score-value")!;
 
         const controller = new Controller(this.cfg.boardElement);
-        const renderer = new Renderer(this.cfg.boardElement, this.cfg.boardSize);
-        const board = new Board(persisted?.boardSize ?? this.cfg.boardSize);
+        const renderer = new Renderer(this.cfg.boardElement, this.state.boardSize);
+        const board = new Board(this.state.boardSize);
 
         const moveHandler = {
             [Command.UP]: () => board.move("y", -1),
@@ -30,39 +72,48 @@ export class Game {
             [Command.RIGHT]: () => board.move("x", 1),
         };
 
-        board.onUpdate(({ cells }) => {
-            const score = cells.reduce((acc, cell) => acc + cell.value, 0);
-            currentScoreValue.innerHTML = String(score);
+        const reset = () => {
+            this.setState({ cells: [], score: 0, afterPartyMode: false });
+            board.reset();
+            board.spawnCells(2);
+            currentScoreValue.innerHTML = String(this.state.score);
+        };
 
+        board.onCellsMerge((cell) => {
+            const currentScore = this.state.score + cell.value;
+            this.setState({ score: currentScore });
+            currentScoreValue.innerHTML = String(currentScore);
+        });
+
+        board.onUpdate(({ cells }) => {
             renderer.render(cells);
 
             if (this.isGameOver(cells)) {
-                setTimeout(() => {
-                    // wait animation
-                    alert("Game Over!");
-                    board.reset();
-                    board.spawnCells(2);
-                }, 300);
-                return;
+                return locked(() =>
+                    sleep(300).then(() => {
+                        alert("Game Over!");
+                        reset();
+                    })
+                );
             }
 
-            if (this.isWin(cells)) {
-                // wait animation
-                setTimeout(() => {
-                    alert("You won 🎉🎉🎉");
-                    board.reset();
-                    board.spawnCells(2);
-                }, 300);
-                return;
+            if (this.isWin(cells) && !this.state.afterPartyMode) {
+                return locked(() =>
+                    sleep(300).then(() => {
+                        const afterPartyMode = confirm("You just reached the 2048 🎉🎉🎉. Do you want to continue?");
+                        if (afterPartyMode) {
+                            this.setState({ afterPartyMode: true });
+                            return;
+                        }
+                        reset();
+                    })
+                );
             }
 
-            Storage.save({ cells, boardSize: this.cfg.boardSize });
+            this.setState({ cells });
         });
 
-        resetButton.addEventListener("click", () => {
-            board.reset();
-            board.spawnCells(2);
-        });
+        resetButton.addEventListener("click", () => reset());
 
         controller.listenCommand((key) => {
             const move = moveHandler[key];
@@ -72,18 +123,18 @@ export class Game {
             if (hasMoved) board.spawnCells(1);
         });
 
-        if (persisted?.cells) {
-            board.restore(persisted.cells);
+        if (this.state.cells.length > 0) {
+            board.restore(this.state.cells);
         } else {
-            board.reset();
-            board.spawnCells(2);
+            reset();
         }
 
         renderer.mount();
+        currentScoreValue.innerHTML = String(this.state.score);
     }
 
     private isWin(cells: Cell[]): boolean {
-        const GOAL = 2048;
+        const GOAL = 16;
         return cells.some((cell) => cell.value === GOAL);
     }
 
@@ -110,3 +161,13 @@ export class Game {
         });
     }
 }
+
+let isLocked = false;
+const locked = async <T>(callback: () => T) => {
+    if (!isLocked) {
+        isLocked = true;
+        const res = await callback();
+        isLocked = false;
+        return res;
+    }
+};

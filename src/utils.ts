@@ -97,3 +97,5 @@ export const deepEqual = (a: unknown, b: unknown): boolean => {
 
     return keysA.every((key) => deepEqual(a[key], b[key]));
 };
+
+export const sleep = (n: number) => new Promise((res) => setTimeout(res, n));

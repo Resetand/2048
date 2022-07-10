@@ -9,11 +9,16 @@ export class Board {
     private state: Readonly<BoardState> = { cells: [] };
     private ee = new EventEmitter();
     private static UPDATE_EVENT = "STATE_CHANGED_EVENT";
+    private static MERGE_EVENT = "CELLS_MERGE_EVENT";
 
     constructor(private readonly boardSize: number) {}
 
     public onUpdate(handler: (state: BoardState, prevState: BoardState) => void) {
         this.ee.addListener(Board.UPDATE_EVENT, (prevState: BoardState) => handler(this.state, prevState));
+    }
+
+    public onCellsMerge(handler: (cell: Cell) => void) {
+        this.ee.addListener(Board.MERGE_EVENT, (cell: Cell) => handler(cell));
     }
 
     public restore(cells: Cell[]) {
@@ -29,7 +34,6 @@ export class Board {
 
         let hasMoved = false;
 
-        const mtxBefore = this.getBoardMatrix();
         const mtx = this.getBoardMatrix();
 
         const mergedKeys = new Set<string>();
@@ -76,6 +80,10 @@ export class Board {
             const cells = Array.from(matrixIterator(mtx))
                 .filter(({ value }) => value !== null)
                 .map(({ value, x, y }) => (value?.setCoords({ x, y }), value!));
+
+            mergedKeys.forEach((mergedKey) => {
+                this.ee.emit(Board.MERGE_EVENT, cells.find((c) => c.key === mergedKey)!);
+            });
 
             this.setState({ cells });
         }

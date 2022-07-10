@@ -1,45 +1,46 @@
-import { Cell } from "./board";
+type Transform<TData> = [(data: TData) => any, (loaded: any) => TData];
 
-interface GamePersisted {
-    cells: Cell[];
-    boardSize: number;
-}
+type TransformConfig<T extends Record<string, any>> = {
+    [P in keyof T]+?: Transform<T[P]>;
+};
 
-interface GamePersistedJson {
-    cells: { value: number; x: number; y: number }[];
-    boardSize: number;
-}
+export class Storage<T extends Record<string, any>> {
+    constructor(private key: string, private transforms?: TransformConfig<T>) {}
 
-export class Storage {
-    private static LS_KEY = "game-state";
-    public static save(state: Partial<GamePersisted>) {
-        const loaded = this.loadJson()!;
+    public save(_data: T) {
+        const data = { ..._data };
 
-        localStorage.setItem(
-            this.LS_KEY,
-            JSON.stringify({
-                ...loaded,
-                boardSize: state.boardSize,
-                cells: state.cells?.map(({ x, y, value }) => ({ x, y, value })),
-            })
-        );
+        Object.entries(this.transforms ?? []).forEach(([key, [encode]]) => {
+            if (data[key]) {
+                data[key as keyof T] = encode(data[key]);
+            }
+        });
+
+        localStorage.setItem(this.key, JSON.stringify(data));
     }
-    public static load(): Partial<GamePersisted> | null {
+    public load(): T | null {
         const parsed = this.loadJson();
 
         if (!parsed) {
             return null;
         }
 
-        return {
-            boardSize: parsed.boardSize,
-            cells: parsed.cells?.map(({ x, y, value }) => new Cell({ x, y }, value)),
-        };
+        Object.entries(this.transforms ?? []).forEach(([key, [, decode]]) => {
+            if (parsed[key]) {
+                parsed[key as keyof T] = decode(parsed[key]);
+            }
+        });
+
+        return parsed;
     }
 
-    private static loadJson(): Partial<GamePersistedJson> | null {
+    public clear() {
+        localStorage.removeItem(this.key);
+    }
+
+    private loadJson(): T | null {
         try {
-            return JSON.parse(localStorage.getItem(this.LS_KEY)!);
+            return JSON.parse(localStorage.getItem(this.key)!);
         } catch {
             return null;
         }
