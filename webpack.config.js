@@ -2,6 +2,7 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const TerserPlugin = require("terser-webpack-plugin");
+const WorkboxPlugin = require("workbox-webpack-plugin");
 
 const path = require("path");
 
@@ -49,6 +50,13 @@ module.exports = {
             hash: true, // cache busting
             filename: "../dist/index.html",
             minify: isProd,
+        }),
+
+        new WorkboxPlugin.GenerateSW({
+            // these options encourage the ServiceWorkers to get in there fast
+            // and not allow any straggling "old" SWs to hang around
+            clientsClaim: true,
+            skipWaiting: true,
         }),
     ],
 };
