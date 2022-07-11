@@ -29,12 +29,17 @@ jobs:
                   restore-keys: |
                       ${{ runner.os }}-node-
 
+            - name: Build
             - run: npm ci
             - run: npm run build
+
+            - name: Copy Assets
+            - run: rm -fr public/*
+            - run: mv dist/* public
 
             - name: Deploy
               uses: peaceiris/actions-gh-pages@v3
               if: ${{ github.ref == 'refs/heads/main' }}
               with:
                   github_token: ${{ secrets.GITHUB_TOKEN }}
-                  publish_dir: ./build
+                  publish_dir: public
