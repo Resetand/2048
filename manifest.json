@@ -1,7 +1,7 @@
 {
     "short_name": "2048",
     "name": "Resetand - 2048",
-    "description": "Classic 2048 game, written via vanilla JS",
+    "description": "Classic 2048 game, via pure JS",
     "icons": [
         {
             "src": "favicon.ico",
