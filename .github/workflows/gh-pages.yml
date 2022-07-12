@@ -21,6 +21,9 @@ jobs:
               with:
                   node-version: "14"
 
+            - name: remove gitignore
+              run: rm .gitignore
+
             - name: Cache dependencies
               uses: actions/cache@v2
               with:
